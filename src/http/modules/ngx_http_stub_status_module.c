@@ -61,22 +61,94 @@ ngx_module_t  ngx_http_stub_status_module = {
     NGX_MODULE_V1_PADDING
 };
 
+/*
 
+  Variables added to the nginx context via ngx_http_stub_status_add_variables 
+  during preconfig.
+
+  These variable expose global variables in the nginx config.  See getter method
+  ngx_http_stub_status_variable for how the exposed config name is mapped to the
+  global variable it represents.
+
+  Each variable is a struct of type ngx_http_variable_t with the following def ...
+  
+    name
+    setter
+    getter
+    data 
+    flags
+    index  
+
+    The "data" is simply the index position of the variable in the 
+    modules variable array "ngx_http_stub_status_vars". 
+
+ */
 static ngx_http_variable_t  ngx_http_stub_status_vars[] = {
 
-    { ngx_string("connections_active"), NULL, ngx_http_stub_status_variable,
-      0, NGX_HTTP_VAR_NOCACHEABLE, 0 },
+    { 
+      ngx_string("connections_active"), /* name                 */ 
+      NULL,                             /* setter               */
+      ngx_http_stub_status_variable,    /* getter               */
+      0,                                /* data (i.e. position) */
+      NGX_HTTP_VAR_NOCACHEABLE,         /* flags                */ 
+      0                                 /* index                */
+    },
 
-    { ngx_string("connections_reading"), NULL, ngx_http_stub_status_variable,
-      1, NGX_HTTP_VAR_NOCACHEABLE, 0 },
+    { 
+      ngx_string("connections_reading"), 
+      NULL, 
+      ngx_http_stub_status_variable,
+      1, 
+      NGX_HTTP_VAR_NOCACHEABLE, 
+      0 
+    },
 
-    { ngx_string("connections_writing"), NULL, ngx_http_stub_status_variable,
-      2, NGX_HTTP_VAR_NOCACHEABLE, 0 },
+    { 
+      ngx_string("connections_writing"), 
+      NULL, 
+      ngx_http_stub_status_variable,
+      2, 
+      NGX_HTTP_VAR_NOCACHEABLE, 
+      0 
+    },
 
-    { ngx_string("connections_waiting"), NULL, ngx_http_stub_status_variable,
-      3, NGX_HTTP_VAR_NOCACHEABLE, 0 },
+    { 
+      ngx_string("connections_waiting"), 
+      NULL, 
+      ngx_http_stub_status_variable,
+      3, 
+      NGX_HTTP_VAR_NOCACHEABLE, 
+      0 
+    },
 
-      ngx_http_null_variable
+    { 
+      ngx_string("connections_accepted"), 
+      NULL, 
+      ngx_http_stub_status_variable,
+      4, 
+      NGX_HTTP_VAR_NOCACHEABLE, 
+      0 
+    },
+
+    { 
+      ngx_string("connections_handled"), 
+      NULL, 
+      ngx_http_stub_status_variable,
+      5, 
+      NGX_HTTP_VAR_NOCACHEABLE, 
+      0 
+    },
+
+    { 
+      ngx_string("connections_requested"), 
+      NULL, 
+      ngx_http_stub_status_variable,
+      6, 
+      NGX_HTTP_VAR_NOCACHEABLE, 
+      0 
+    },
+    
+    ngx_http_null_variable
 };
 
 
@@ -188,6 +260,18 @@ ngx_http_stub_status_variable(ngx_http_request_t *r,
     case 3:
         value = *ngx_stat_waiting;
         break;
+
+    case 4:
+        value = *ngx_stat_accepted;
+        break;
+
+    case 5:
+        value = *ngx_stat_handled;
+        break;
+
+    case 6:
+        value = *ngx_stat_requests;
+        break;  
 
     /* suppress warning */
     default:
